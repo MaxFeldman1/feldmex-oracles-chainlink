@@ -15,7 +15,7 @@ contract orcHelper is Ownable {
 
 	mapping(string => Info) public PairInfo;
 
-	function oracleAddresses(address _strikeAssetAddress, address _underlyingAssetAddress) public returns (address) {
+	function oracleAddresses(address _strikeAssetAddress, address _underlyingAssetAddress) public view returns (address) {
 		return PairInfo[string(abi.encodePacked(TickerSymbols[_strikeAssetAddress], '/', TickerSymbols[_underlyingAssetAddress]))].oracleAddress;
 	}
 

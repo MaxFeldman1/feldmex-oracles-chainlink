@@ -17,31 +17,6 @@ contract Oracle {
         ai2 = AggregatorInterface(fluxAggregatorAddress);
     }
 
-    function getRoundData(uint80 _roundId) public view
-        returns (
-          uint80 roundId,
-          int256 answer,
-          uint256 startedAt,
-          uint256 updatedAt,
-          uint80 answeredInRound
-        )
-    {
-        (roundId, answer, startedAt, updatedAt, answeredInRound) = AggregatorV3Interface(fluxAggregatorAddress).getRoundData(_roundId);
-        require(updatedAt > 0, "invalid round");
-    }
-
-    function getLatest() public view
-        returns (
-          uint80 roundId,
-          int256 answer,
-          uint256 startedAt,
-          uint256 updatedAt,
-          uint80 answeredInRound
-        )
-    {
-        return getRoundData(uint32(AggregatorInterface(fluxAggregatorAddress).latestRound()));
-    }
-
     function fetchRoundBehind(uint80 _roundId) public view returns (uint, uint80) {
         uint timestamp = ai2.getTimestamp(_roundId);
         while (timestamp == 0 && _roundId != 0) {
