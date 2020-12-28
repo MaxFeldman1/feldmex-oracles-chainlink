@@ -4,13 +4,14 @@ import "./Ownable.sol";
 import "./Oracle.sol";
 import "./interfaces/IFeldmexOracle.sol";
 import "./interfaces/IOracleContainer.sol";
+import "./interfaces/IAggregatorFacade.sol";
 
 import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV2V3Interface.sol";
 
 contract OracleContainer is Ownable, IOracleContainer {
 
 	struct Info {
-		address aggregatorAddress;
+		address baseAggregatorAddress;
 		address oracleAddress;
 	}
 
@@ -26,9 +27,9 @@ contract OracleContainer is Ownable, IOracleContainer {
 		require(_underlyingAssetAddress != _strikeAssetAddress, "underlying asset must not be the same as strike asset");
 		string memory phrase = string(abi.encodePacked(TickerSymbols[_strikeAssetAddress], '/', TickerSymbols[_underlyingAssetAddress]));
 		Info memory info = PairInfo[phrase];
-		require(info.aggregatorAddress != address(0), "chainlink aggregator must exist to create options chain");
+		require(info.baseAggregatorAddress != address(0), "chainlink aggregator must exist to create options chain");
 		require(info.oracleAddress == address(0), "cannot deploy oracle that already exists");
-		PairInfo[phrase].oracleAddress = address(new Oracle(info.aggregatorAddress));
+		PairInfo[phrase].oracleAddress = address(new Oracle(info.baseAggregatorAddress));
 	}
 
 	function addTickers(address[] memory _assetAddresses, string[] memory _tickerSymbols) public onlyOwner {
@@ -40,37 +41,37 @@ contract OracleContainer is Ownable, IOracleContainer {
 		}
 	}
 
-	function addAggregators(string[] memory _pairTicker, address[] memory _aggregators) public onlyOwner {
+	function addAggregators(string[] memory _pairTicker, address[] memory _facades) public onlyOwner {
 		uint length = _pairTicker.length;
-		require(length == _aggregators.length);
+		require(length == _facades.length);
 		for (uint i = 0; i < length; i++) {
 			require(bytes(_pairTicker[i])[0] != "/");
 			require(bytes(_pairTicker[i])[_pairTicker.length-1] != "/");
-			PairInfo[_pairTicker[i]].aggregatorAddress = _aggregators[i];
+			PairInfo[_pairTicker[i]].baseAggregatorAddress = address(IAggregatorFacade(_facades[i]).aggregator());
 		}
 	}
 
 	function tokensToLatestPrice(address _strikeAssetAddress, address _underlyingAssetAddress) external view override returns (uint spot, uint8 decimals) {
-		address aggregatorAddress = PairInfo[string(abi.encodePacked(TickerSymbols[_strikeAssetAddress], '/', TickerSymbols[_underlyingAssetAddress]))].aggregatorAddress;
+		address baseAggregatorAddress = PairInfo[string(abi.encodePacked(TickerSymbols[_strikeAssetAddress], '/', TickerSymbols[_underlyingAssetAddress]))].baseAggregatorAddress;
 		//when flip == true we need to return 1/price fetched
-		bool flip = aggregatorAddress == address(0);
+		bool flip = baseAggregatorAddress == address(0);
 		if (flip) {
-			aggregatorAddress = PairInfo[string(abi.encodePacked(TickerSymbols[_underlyingAssetAddress], '/', TickerSymbols[_strikeAssetAddress]))].aggregatorAddress;
-			require(aggregatorAddress != address(0));
+			baseAggregatorAddress = PairInfo[string(abi.encodePacked(TickerSymbols[_underlyingAssetAddress], '/', TickerSymbols[_strikeAssetAddress]))].baseAggregatorAddress;
+			require(baseAggregatorAddress != address(0));
 		}
 		//we can safely assume that the spot will never be negative and that a conversion to uint will be safe.
-		spot = uint(AggregatorV2V3Interface(aggregatorAddress).latestAnswer());
-		decimals = AggregatorV2V3Interface(aggregatorAddress).decimals();
+		spot = uint(AggregatorV2V3Interface(baseAggregatorAddress).latestAnswer());
+		decimals = AggregatorV2V3Interface(baseAggregatorAddress).decimals();
 		if (flip) spot = 10**uint(2*decimals) / spot;
 	}
 
 
 	function phraseToLatestPrice(string calldata _phrase) external view override returns (uint spot, uint8 decimals) {
-		address aggregatorAddress = PairInfo[_phrase].aggregatorAddress;
-		require(aggregatorAddress != address(0));
+		address baseAggregatorAddress = PairInfo[_phrase].baseAggregatorAddress;
+		require(baseAggregatorAddress != address(0));
 		//we can safely assume that the spot will never be negative and that a conversion to uint will be safe.
-		spot = uint(AggregatorV2V3Interface(aggregatorAddress).latestAnswer());
-		decimals = AggregatorV2V3Interface(aggregatorAddress).decimals();		
+		spot = uint(AggregatorV2V3Interface(baseAggregatorAddress).latestAnswer());
+		decimals = AggregatorV2V3Interface(baseAggregatorAddress).decimals();
 	}
 
 
@@ -94,6 +95,5 @@ contract OracleContainer is Ownable, IOracleContainer {
 		spot = IFeldmexOracle(oracleAddress).fetchSpotAtTime(_timestamp);
 		decimals = IFeldmexOracle(oracleAddress).decimals();
 	}
-
 
 }

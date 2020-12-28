@@ -29,7 +29,11 @@ contract dummyAggregator {
 	}
 
 	function latestRound() external view returns(uint) {
-		return rounds.length;
+		return rounds.length-1;
+	}
+
+	function latestAnswer() external view returns(int) {
+		return rounds[rounds.length-1].answer;
 	}
 
 

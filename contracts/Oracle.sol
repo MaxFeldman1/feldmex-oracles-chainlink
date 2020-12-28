@@ -6,15 +6,10 @@ import "./interfaces/IFeldmexOracle.sol";
 
 contract Oracle is IFeldmexOracle {
 
-    address aggregatorAddress;
-    address public fluxAggregatorAddress;
-    
     AggregatorV2V3Interface ai;
 
     constructor (address _aggregatorAddress) public {
-        aggregatorAddress = _aggregatorAddress;
-        fluxAggregatorAddress = address(IAggregatorFacade(_aggregatorAddress).aggregator());
-        ai = AggregatorV2V3Interface(fluxAggregatorAddress);
+        ai = AggregatorV2V3Interface(_aggregatorAddress);
     }
 
     function fetchRoundBehind(uint80 _roundId) internal view returns (uint, uint80) {
@@ -26,7 +21,7 @@ contract Oracle is IFeldmexOracle {
         return (timestamp, _roundId);
     }
 
-    function fetchSpotAtTime(uint timestamp) external view override returns (uint price) {
+    function fetchSpotAtTime(uint timestamp) public view override returns (uint price) {
         //we can safely assume that the price will never be negative
         price = uint(ai.getAnswer(fetchRoundAtTimestamp(timestamp)));
     }
@@ -64,5 +59,5 @@ contract Oracle is IFeldmexOracle {
         (,back) = fetchRoundBehind(back);
         return fremostRoundWithSameTimestamp(back);
     }
-    
+
 }

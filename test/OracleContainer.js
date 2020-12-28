@@ -6,6 +6,9 @@ const ERC20 = artifacts.require("ERC20");
 
 const defaultAddress = "0x0000000000000000000000000000000000000000";
 const helper = require("../helper/helper.js");
+const BN = web3.utils.BN;
+
+const decimals = "3";
 
 contract('OracleContainer', async () => {
 
@@ -17,7 +20,7 @@ contract('OracleContainer', async () => {
 			which interact with the base aggregator contracts,
 			keep this naming convention in mind to prevent confusion
 		*/
-		baseAggregatorInstance = await dummyAggregator.new("3");
+		baseAggregatorInstance = await dummyAggregator.new(decimals);
 		facadeInstance = await dummyAggregatorFacade.new(baseAggregatorInstance.address);
 		containerInstance = await OracleContainer.new();
 
@@ -44,15 +47,53 @@ contract('OracleContainer', async () => {
 		phrase = Ticker0+"/"+Ticker1;
 		await containerInstance.addAggregators([phrase], [facadeInstance.address]);
 		info = await containerInstance.PairInfo(phrase);
-		assert.equal(info.aggregatorAddress, facadeInstance.address, "info.aggregatorAddress is correct");
+		assert.equal(info.baseAggregatorAddress, baseAggregatorInstance.address, "info.baseAggregatorAddress is correct");
 		assert.equal(info.oracleAddress, defaultAddress, "info.oracleAddress should be null");
 	});
 
 	it('deploy Oracle', async () => {
 		await containerInstance.deploy(asset0.address, asset1.address);
 		info = await containerInstance.PairInfo(phrase);
-		assert.equal(info.aggregatorAddress, facadeInstance.address, "info.aggregatorAddress is correct");
+		assert.equal(info.baseAggregatorAddress, baseAggregatorInstance.address, "info.baseAggregatorAddress is correct");
 		assert.notEqual(info.oracleAddress, defaultAddress, "info.oracleAddress should be non null");
+		oracleInstance = await Oracle.at(info.oracleAddress);
+	});
+
+	it('tokens to latest price flip:false', async () => {
+		let res = await containerInstance.tokensToLatestPrice(asset0.address, asset1.address);
+		assert.equal(res.spot.toString(), prices[prices.length-1], "correct value of spot returned from tokensToLatestPrice()");
+		assert.equal(res.decimals.toString(), decimals, "correct value of decimals returned from tokensToLatestPrice()");
+	});
+
+	it('tokens to latest price flip:true', async () => {
+		let res = await containerInstance.tokensToLatestPrice(asset1.address, asset0.address);
+		assert.equal(res.spot.toString(), ((new BN("10")).pow(new BN(2 * res.decimals.toNumber()))).div(new BN(prices[prices.length-1])).toString(), "correct value of spot returned from tokensToLatestPrice()");
+		assert.equal(res.decimals.toString(), decimals, "correct value of decimals returned from tokensToLatestPrice()");
+	});
+
+	it('phrase to latest price', async () => {
+		let res = await containerInstance.phraseToLatestPrice(phrase);
+		assert.equal(res.spot.toString(), prices[prices.length-1], "correct value of spot returned from phraseToHistoricalPrice()");
+		assert.equal(res.decimals.toString(), decimals, "correct value of decimals returned from phraseToHistoricalPrice()");
+	});
+
+	it('tokens to historical price flip:false', async () => {
+		firstTime = await baseAggregatorInstance.getTimestamp(0);
+		let res = await containerInstance.tokensToHistoricalPrice(asset0.address, asset1.address, firstTime.toString());
+		assert.equal(res.spot.toString(), prices[0], "correct value of spot retuend from tokensToHistoricalPrice()");
+		assert.equal(res.decimals.toString(), decimals, "correct value of decimals retuend from tokensToHistoricalPrice()");
+	});
+
+	it('tokens to historical price flip:true', async () => {
+		let res = await containerInstance.tokensToHistoricalPrice(asset1.address, asset0.address, firstTime.toString());
+		assert.equal(res.spot.toString(), ((new BN("10")).pow(new BN(2 * res.decimals.toNumber()))).div(new BN(prices[0])).toString(), "correct value of spot retuend from tokensToHistoricalPrice()");
+		assert.equal(res.decimals.toString(), decimals, "correct value of decimals retuend from tokensToHistoricalPrice()");
+	});
+
+	it('phrase to historical price', async () => {
+		let res = await containerInstance.phraseToHistoricalPrice(phrase, firstTime.toString());
+		assert.equal(res.spot.toString(), prices[0], "correct value of spot retuend from phraseToHistoricalPrice()");
+		assert.equal(res.decimals.toString(), decimals, "correct value of decimals retuend from phraseToHistoricalPrice()");
 	});
 
 });
