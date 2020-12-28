@@ -24,10 +24,11 @@ contract OracleContainer is Ownable, IOracleContainer {
 
 	function deploy(address _strikeAssetAddress, address _underlyingAssetAddress) public {
 		require(_underlyingAssetAddress != _strikeAssetAddress, "underlying asset must not be the same as strike asset");
-		Info memory info = PairInfo[string(abi.encodePacked(TickerSymbols[_strikeAssetAddress], '/', TickerSymbols[_underlyingAssetAddress]))];
+		string memory phrase = string(abi.encodePacked(TickerSymbols[_strikeAssetAddress], '/', TickerSymbols[_underlyingAssetAddress]));
+		Info memory info = PairInfo[phrase];
 		require(info.aggregatorAddress != address(0), "chainlink aggregator must exist to create options chain");
 		require(info.oracleAddress == address(0), "cannot deploy oracle that already exists");
-		info.oracleAddress = address(new Oracle(info.aggregatorAddress));
+		PairInfo[phrase].oracleAddress = address(new Oracle(info.aggregatorAddress));
 	}
 
 	function addTickers(address[] memory _assetAddresses, string[] memory _tickerSymbols) public onlyOwner {

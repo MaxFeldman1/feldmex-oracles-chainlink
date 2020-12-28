@@ -8,5 +8,5 @@ import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV2V3Interface.sol";
 	Please note that this interface is made for use with chainlink aggregators but was not made by chainlink
 */
 interface IAggregatorFacade {
-	function aggregator() external view returns(AggregatorInterface);
+	function aggregator() external view returns(AggregatorV2V3Interface);
 }

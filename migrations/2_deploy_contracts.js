@@ -1,17 +1,16 @@
-const orcHelper = artifacts.require("orcHelper");
+const OracleContainer = artifacts.require("OracleContainer");
+const Oracle = artifacts.require("Oracle");
+const dummyAggregator = artifacts.require("dummyAggregator");
+const dummyAggregatorFacade = artifacts.require("dummyAggregatorFacade");
 
 var KovanTickerSymbols = {};
 const KovanOracleMappings = {
-	'BTC/USD': "0x6135b13325bfC4B00278B4abC5e20bbce2D6580e",
-	'ETH/USD': "0x9326BFA02ADD2366b30bacB125260Af641031331",
+	'BTC/USD': "0x0000000000000000000000000000000000000000",
+	'ETH/USD': "0x0000000000000000000000000000000000000000",
 };
 
-/*
-	TickerSymbols[address(asset)] => ticker symbol of asset
-
-	OracleMappings[TickerSymbols[address(asset0)] + '/' + TickerSymbols[address(asset1)]] => address(oracle)
-*/
-
-module.exports = function(deployer) {
-  deployer.deploy(orcHelper);
+module.exports = async function(deployer) {
+	aggregatorInstance = await deployer.deploy(dummyAggregator, "3");
+	aggregatorInstance = await deployer.deploy(dummyAggregator, "3");
+	facadeInstance = await deployer.deploy(dummyAggregatorFacade, aggregatorInstance.address);
 };
