@@ -5,15 +5,31 @@ const dummyAggregatorFacade = artifacts.require("dummyAggregatorFacade");
 const ERC20 = artifacts.require("ERC20");
 
 const defaultAddress = "0x0000000000000000000000000000000000000000";
+const helper = require("../helper/helper.js");
 
 contract('OracleContainer', async () => {
 
 	it('before each', async () => {
 		asset0 = await ERC20.new();
 		asset1 = await ERC20.new();
-		aggregatorInstance = await dummyAggregator.new("3");
-		facadeInstance = await dummyAggregatorFacade.new(aggregatorInstance.address);
+		/*
+			the aggregator addresses listed on the chainlink website are the aggregator facade contract addresses
+			which interact with the base aggregator contracts,
+			keep this naming convention in mind to prevent confusion
+		*/
+		baseAggregatorInstance = await dummyAggregator.new("3");
+		facadeInstance = await dummyAggregatorFacade.new(baseAggregatorInstance.address);
 		containerInstance = await OracleContainer.new();
+
+		/*
+			preset rounds in aggregators
+		*/
+		prices = ["10000", "20000", "30000"];
+		for (let i = 0; i < prices.length; i++) {
+			await baseAggregatorInstance.addRound(prices[i]);
+			//advance 100 seconds between rounds
+			await helper.advanceTime(100);
+		}
 	});
 
 	it('add tickers', async () => {
