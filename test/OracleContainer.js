@@ -67,8 +67,8 @@ contract('OracleContainer', async () => {
 
 	it('tokens to latest price flip:true', async () => {
 		let res = await containerInstance.tokensToLatestPrice(asset1.address, asset0.address);
-		assert.equal(res.spot.toString(), ((new BN("10")).pow(new BN(2 * res.decimals.toNumber()))).div(new BN(prices[prices.length-1])).toString(), "correct value of spot returned from tokensToLatestPrice()");
-		assert.equal(res.decimals.toString(), decimals, "correct value of decimals returned from tokensToLatestPrice()");
+		assert.equal(res.spot.toString(), ((new BN("10")).pow(new BN(18 + parseInt(decimals)))).div(new BN(prices[prices.length-1])).toString(), "correct value of spot returned from tokensToLatestPrice()");
+		assert.equal(res.decimals.toString(), "18", "correct value of decimals returned from tokensToLatestPrice()");
 	});
 
 	it('phrase to latest price', async () => {
@@ -86,8 +86,8 @@ contract('OracleContainer', async () => {
 
 	it('tokens to historical price flip:true', async () => {
 		let res = await containerInstance.tokensToHistoricalPrice(asset1.address, asset0.address, firstTime.toString());
-		assert.equal(res.spot.toString(), ((new BN("10")).pow(new BN(2 * res.decimals.toNumber()))).div(new BN(prices[0])).toString(), "correct value of spot retuend from tokensToHistoricalPrice()");
-		assert.equal(res.decimals.toString(), decimals, "correct value of decimals retuend from tokensToHistoricalPrice()");
+		assert.equal(res.spot.toString(), ((new BN("10")).pow(new BN(18 + parseInt(decimals)))).div(new BN(prices[0])).toString(), "correct value of spot retuend from tokensToHistoricalPrice()");
+		assert.equal(res.decimals.toString(), "18", "correct value of decimals retuend from tokensToHistoricalPrice()");
 	});
 
 	it('phrase to historical price', async () => {

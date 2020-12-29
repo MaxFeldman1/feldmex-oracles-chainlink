@@ -62,7 +62,10 @@ contract OracleContainer is Ownable, IOracleContainer {
 		//we can safely assume that the spot will never be negative and that a conversion to uint will be safe.
 		spot = uint(AggregatorV2V3Interface(baseAggregatorAddress).latestAnswer());
 		decimals = AggregatorV2V3Interface(baseAggregatorAddress).decimals();
-		if (flip) spot = 10**uint(2*decimals) / spot;
+		if (flip) {
+			spot = 10**uint(18+decimals) / spot;
+			decimals = 18;
+		}
 	}
 
 
@@ -85,7 +88,10 @@ contract OracleContainer is Ownable, IOracleContainer {
 		}
 		spot = IFeldmexOracle(oracleAddress).fetchSpotAtTime(_timestamp);
 		decimals = IFeldmexOracle(oracleAddress).decimals();
-		if (flip) spot = 10**uint(2*decimals) / spot;
+		if (flip) {
+			spot = 10**uint(18+decimals) / spot;
+			decimals = 18;
+		}
 	}
 
 
