@@ -12,5 +12,5 @@ const KovanOracleMappings = {
 module.exports = async function(deployer) {
 	aggregatorInstance = await deployer.deploy(dummyAggregator, "3");
 	aggregatorInstance = await deployer.deploy(dummyAggregator, "3");
-	facadeInstance = await deployer.deploy(dummyAggregatorFacade, aggregatorInstance.address);
+	facadeInstance = await deployer.deploy(dummyAggregatorFacade, aggregatorInstance.address, "BTC/USD");
 };

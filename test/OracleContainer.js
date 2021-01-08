@@ -10,6 +10,11 @@ const BN = web3.utils.BN;
 
 const decimals = "3";
 
+const Ticker0 = "BTC";
+const Ticker1 = "USD";
+const phrase = Ticker0+"/"+Ticker1;
+
+
 contract('OracleContainer', async () => {
 
 	it('before each', async () => {
@@ -21,7 +26,7 @@ contract('OracleContainer', async () => {
 			keep this naming convention in mind to prevent confusion
 		*/
 		baseAggregatorInstance = await dummyAggregator.new(decimals);
-		facadeInstance = await dummyAggregatorFacade.new(baseAggregatorInstance.address);
+		facadeInstance = await dummyAggregatorFacade.new(baseAggregatorInstance.address, phrase);
 		containerInstance = await OracleContainer.new();
 
 		/*
@@ -37,10 +42,7 @@ contract('OracleContainer', async () => {
 	});
 
 	it('add aggregators', async () => {
-		Ticker0 = "BTC";
-		Ticker1 = "USD";
-		phrase = Ticker0+"/"+Ticker1;
-		await containerInstance.addAggregators([phrase], [facadeInstance.address]);
+		await containerInstance.addAggregators([facadeInstance.address]);
 		info = await containerInstance.PairInfo(phrase);
 		assert.equal(info.baseAggregatorAddress, baseAggregatorInstance.address, "info.baseAggregatorAddress is correct");
 		assert.equal(info.oracleAddress, defaultAddress, "info.oracleAddress should be null");

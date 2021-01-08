@@ -5,7 +5,10 @@ import "../interfaces/IAggregatorFacade.sol";
 contract dummyAggregatorFacade is IAggregatorFacade {
 	AggregatorV2V3Interface public override aggregator;
 
-	constructor (address _aggregatorAddress) public {
+	string public override description;
+
+	constructor (address _aggregatorAddress, string memory _description) public {
 		aggregator = AggregatorV2V3Interface(_aggregatorAddress);
+		description = _description;
 	}
 }

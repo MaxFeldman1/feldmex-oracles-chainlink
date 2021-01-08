@@ -24,13 +24,12 @@ contract OracleContainer is Ownable, IOracleContainer {
 		PairInfo[_phrase].oracleAddress = address(new Oracle(info.baseAggregatorAddress));
 	}
 
-	function addAggregators(string[] memory _pairTicker, address[] memory _facades) public onlyOwner {
-		uint length = _pairTicker.length;
-		require(length == _facades.length);
+	function addAggregators(address[] memory _facades) public onlyOwner {
+		uint length = _facades.length;
 		for (uint i = 0; i < length; i++) {
-			require(bytes(_pairTicker[i])[0] != "/");
-			require(bytes(_pairTicker[i])[_pairTicker.length-1] != "/");
-			PairInfo[_pairTicker[i]].baseAggregatorAddress = address(IAggregatorFacade(_facades[i]).aggregator());
+			address facade = _facades[i];
+			address addr = address(IAggregatorFacade(facade).aggregator());
+			PairInfo[IAggregatorFacade(facade).description()].baseAggregatorAddress = addr;
 		}
 	}
 

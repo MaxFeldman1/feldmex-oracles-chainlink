@@ -9,4 +9,5 @@ import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV2V3Interface.sol";
 */
 interface IAggregatorFacade {
 	function aggregator() external view returns(AggregatorV2V3Interface);
+	function description() external view returns(string memory);
 }
