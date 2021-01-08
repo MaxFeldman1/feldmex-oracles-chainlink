@@ -14,7 +14,7 @@ contract Oracle is IFeldmexOracle {
 
     function fetchRoundBehind(uint80 _roundId) internal view returns (uint, uint80) {
         uint timestamp = ai.getTimestamp(_roundId);
-        while (timestamp == 0 && _roundId != 0) {
+        while (timestamp == 0 && _roundId > 0) {
             _roundId--;
             timestamp = ai.getTimestamp(_roundId);
         }
@@ -28,8 +28,9 @@ contract Oracle is IFeldmexOracle {
 
     function fremostRoundWithSameTimestamp(uint _roundId) internal view returns (uint) {
         uint timestamp = ai.getTimestamp(_roundId);
+        uint80 latest = uint80(ai.latestRound());
         _roundId++;
-        while (timestamp == ai.getTimestamp(_roundId)) _roundId++;
+        while (timestamp == ai.getTimestamp(_roundId) && _roundId < latest) _roundId++;
         return _roundId-1;
     }
 
@@ -40,7 +41,7 @@ contract Oracle is IFeldmexOracle {
     function fetchRoundAtTimestamp(uint timestamp) public view override returns (uint) {
         uint80 latest = uint80(ai.latestRound());
         (uint fetchedTime, uint80 fetchedRound) = fetchRoundBehind(latest);
-        if (timestamp >= fetchedTime) return fremostRoundWithSameTimestamp(fetchedRound);
+        if (timestamp >= fetchedTime) return fetchedRound;
         latest = fetchedRound;
         uint80 back; // = 0
         uint80 next;
@@ -58,6 +59,6 @@ contract Oracle is IFeldmexOracle {
         } while (next != back);
         (,back) = fetchRoundBehind(back);
         return fremostRoundWithSameTimestamp(back);
-    }
+    }    
 
 }

@@ -2,7 +2,6 @@ const OracleContainer = artifacts.require("OracleContainer");
 const Oracle = artifacts.require("Oracle");
 const dummyAggregator = artifacts.require("dummyAggregator");
 const dummyAggregatorFacade = artifacts.require("dummyAggregatorFacade");
-const ERC20 = artifacts.require("ERC20");
 
 const defaultAddress = "0x0000000000000000000000000000000000000000";
 const helper = require("../helper/helper.js");
@@ -18,8 +17,6 @@ const phrase = Ticker0+"/"+Ticker1;
 contract('OracleContainer', async () => {
 
 	it('before each', async () => {
-		asset0 = await ERC20.new();
-		asset1 = await ERC20.new();
 		/*
 			the aggregator addresses listed on the chainlink website are the aggregator facade contract addresses
 			which interact with the base aggregator contracts,

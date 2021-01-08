@@ -14,6 +14,7 @@ contract dummyAggregator {
 
 	constructor(uint8 _decimals) public {
 		decimals = _decimals;
+		rounds.push(round(0, block.timestamp));
 	}
 
 	function addRound(int _answer) external {
