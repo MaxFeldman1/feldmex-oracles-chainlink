@@ -33,6 +33,14 @@ contract OracleContainer is Ownable, IOracleContainer {
 		}
 	}
 
+	function BaseAggregatorAddress(string calldata _phrase) external view override returns (address addr) {
+		addr = PairInfo[_phrase].baseAggregatorAddress;
+	}
+
+	function OracleAddress(string calldata _phrase) external view override returns (address addr) {
+		addr = PairInfo[_phrase].oracleAddress;
+	}
+
 	function phraseToLatestPrice(string calldata _phrase) external view override returns (uint spot, uint8 decimals) {
 		address baseAggregatorAddress = PairInfo[_phrase].baseAggregatorAddress;
 		require(baseAggregatorAddress != address(0));

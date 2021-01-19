@@ -28,9 +28,8 @@ contract Oracle is IFeldmexOracle {
 
     function fremostRoundWithSameTimestamp(uint _roundId) internal view returns (uint) {
         uint timestamp = ai.getTimestamp(_roundId);
-        uint80 latest = uint80(ai.latestRound());
         _roundId++;
-        while (timestamp == ai.getTimestamp(_roundId) && _roundId < latest) _roundId++;
+        while (timestamp == ai.getTimestamp(_roundId)) _roundId++;
         return _roundId-1;
     }
 
