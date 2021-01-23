@@ -1,5 +1,4 @@
 pragma solidity >=0.6.0;
-pragma experimental ABIEncoderV2;
 import "./Ownable.sol";
 import "./Oracle.sol";
 import "./interfaces/IFeldmexOracle.sol";
@@ -29,7 +28,9 @@ contract OracleContainer is Ownable, IOracleContainer {
 		for (uint i = 0; i < length; i++) {
 			address facade = _facades[i];
 			address addr = address(IAggregatorFacade(facade).aggregator());
-			PairInfo[IAggregatorFacade(facade).description()].baseAggregatorAddress = addr;
+			string memory description = IAggregatorFacade(facade).description();
+			require(PairInfo[description].baseAggregatorAddress == address(0));
+			PairInfo[description].baseAggregatorAddress = addr;
 		}
 	}
 

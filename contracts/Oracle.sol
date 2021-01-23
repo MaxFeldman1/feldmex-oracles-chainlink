@@ -1,8 +1,9 @@
 pragma solidity >=0.6.0;
 
-import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV2V3Interface.sol";
 import "./interfaces/IAggregatorFacade.sol";
 import "./interfaces/IFeldmexOracle.sol";
+
+import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV2V3Interface.sol";
 
 contract Oracle is IFeldmexOracle {
 
